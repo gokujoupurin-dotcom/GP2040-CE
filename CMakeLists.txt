@@ -192,6 +192,7 @@ add_compile_definitions(PICO_STACK_SIZE=0x1000)
 add_executable(${PROJECT_NAME}
 src/main.cpp
 src/wifi_udp_input.cpp
+src/wifi_receiver.cpp   # ★ここに今回追加したファイルを記述
 src/gp2040.cpp
 src/gp2040aux.cpp
 src/gamepad.cpp

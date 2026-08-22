@@ -124,6 +124,10 @@ jobs:
         id: core_count
         run: cat /proc/cpuinfo  | grep processor | wc -l
         #End Global Setup
+        # --- ここから追記 ---
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y python3-protobuf protobuf-compiler
+      # --- ここまで ---
 
       - name: Pico Build Configure CMake
         shell: bash
