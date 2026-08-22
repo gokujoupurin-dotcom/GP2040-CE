@@ -119,26 +119,25 @@ jobs:
         id: core_count
         run: cat /proc/cpuinfo  | grep processor | wc -l
 
-      # Python依存関係のインストール（仮想環境対応版）
-      - name: Install Python dependencies inside venv
+      # 【最後の手段】システム全体にAPTおよびPIPで確実にprotobufを流し込み、仮想環境作成を無効化・強制上書きする
+      - name: Force Install Global Protobuf & Dependencies
         shell: bash
         run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-protobuf protobuf-compiler python3-pip
           python3 -m pip install --upgrade pip
           python3 -m pip install protobuf grpcio-tools
-          python3 -c "
-          import os, subprocess
-          ws = '${{github.workspace}}'
-          for root, dirs, files in os.walk(ws):
-              if 'activate' in files and ('bin' in root or 'Scripts' in root):
-                  pip_path = os.path.join(root, 'pip')
-                  if os.path.exists(pip_path):
-                      print('Found venv pip at:', pip_path)
-                      subprocess.run([pip_path, 'install', 'protobuf', 'grpcio-tools'])
-          "
 
       - name: Pico Build Configure CMake
         shell: bash
-        run: PICO_SDK_PATH=${{github.workspace}}/pico-sdk GP2040_BOARDCONFIG=${{ matrix.GP2040_BOARDCONFIG }} SKIP_WEBBUILD=TRUE cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        run: |
+          PICO_SDK_PATH=${{github.workspace}}/pico-sdk \
+          GP2040_BOARDCONFIG=${{ matrix.GP2040_BOARDCONFIG }} \
+          SKIP_WEBBUILD=TRUE \
+          cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+          -DPython3_FIND_VIRTUALENV=OFF \
+          -DPython3_EXECUTABLE=$(which python3)
 
       - name: Pico Build
         shell: bash
