@@ -123,8 +123,14 @@ jobs:
       - name: Install Python dependencies
         shell: bash
         run: |
-          python3 -m pip install --upgrade pip
+          # 1. システム環境へインストール
           python3 -m pip install protobuf grpcio-tools
+          
+          # 2. もしビルドプロセスが自動生成するであろう仮想環境のパスを強制的に指定してインストール
+          # (多くのプロジェクトではビルドディレクトリ内に venv を作ります)
+          if [ -d "${{github.workspace}}/build/pico-sdk/python" ]; then
+             ${{github.workspace}}/build/pico-sdk/python/bin/pip install protobuf grpcio-tools
+          fi
 
       - name: Pico Build Configure CMake
         shell: bash
