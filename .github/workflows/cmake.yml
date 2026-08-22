@@ -120,17 +120,24 @@ jobs:
         run: cat /proc/cpuinfo  | grep processor | wc -l
 
       # Python依存関係のインストール（CMake実行の直前に配置）
-      - name: Install Python dependencies
+      - name: Install Python dependencies inside venv
         shell: bash
         run: |
-          # 1. システム環境へインストール
+          # 1. システム全体へ念のためインストール
+          python3 -m pip install --upgrade pip
           python3 -m pip install protobuf grpcio-tools
-          
-          # 2. もしビルドプロセスが自動生成するであろう仮想環境のパスを強制的に指定してインストール
-          # (多くのプロジェクトではビルドディレクトリ内に venv を作ります)
-          if [ -d "${{github.workspace}}/build/pico-sdk/python" ]; then
-             ${{github.workspace}}/build/pico-sdk/python/bin/pip install protobuf grpcio-tools
-          fi
+
+          # 2. pico-sdk やビルド成果物周辺に作られた仮想環境（venv）を探して強制的にインストールする
+          # Pico SDKは通常 .pico-sdk または build内などにpython仮想環境を作ります
+          python3 -c "
+import os, subprocess, sys
+for root, dirs, files in os.walk('${{github.workspace}}'):
+    if 'activate' in files and ('bin' in root or 'Scripts' in root):
+        pip_path = os.path.join(root, 'pip')
+        if os.path.exists(pip_path):
+            print(f'Found venv pip at: {pip_path}')
+            subprocess.run([pip_path, 'install', 'protobuf', 'grpcio-tools'])
+"
 
       - name: Pico Build Configure CMake
         shell: bash
