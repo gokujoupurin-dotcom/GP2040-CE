@@ -243,18 +243,17 @@ void rndis_task(void)
 }
 
 /* lwip has provision for using a mutex, when applicable */
-sys_prot_t sys_arch_protect(void)
+__attribute__((weak)) sys_prot_t sys_arch_protect(void)
 {
-  return 0;
+    return save_and_disable_interrupts();
 }
 
-void sys_arch_unprotect(sys_prot_t pval)
+__attribute__((weak)) void sys_arch_unprotect(sys_prot_t pval)
 {
-  (void)pval;
+    restore_interrupts(pval);
 }
 
-/* lwip needs a millisecond time source, and the TinyUSB board support code has one available */
-uint32_t sys_now(void)
+__attribute__((weak)) u32_t sys_now(void)
 {
-  return to_ms_since_boot(get_absolute_time());
+    return to_ms_since_boot(get_absolute_time());
 }

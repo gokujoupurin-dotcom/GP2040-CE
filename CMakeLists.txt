@@ -15,7 +15,7 @@ endif()
 if(DEFINED ENV{PICO_BOARD})
   set(PICO_BOARD $ENV{PICO_BOARD} CACHE STRING "Board type")
 else()
-  set(PICO_BOARD pico CACHE STRING "Board type")
+  set(PICO_BOARD pico_w CACHE STRING "Board type")
 endif()
 
 if(DEFINED ENV{PICO_PLATFORM})
@@ -191,6 +191,7 @@ add_compile_definitions(PICO_STACK_SIZE=0x1000)
 
 add_executable(${PROJECT_NAME}
 src/main.cpp
+src/wifi_udp_input.cpp
 src/gp2040.cpp
 src/gp2040aux.cpp
 src/gamepad.cpp
@@ -322,6 +323,7 @@ pico_set_program_version(GP2040-CE ${GIT_REPO_VERSION})
 
 target_link_libraries(${PROJECT_NAME}
 pico_stdlib
+pico_cyw43_arch_lwip_poll
 pico_bootsel_via_double_reset
 tinyusb_host
 tinyusb_pico_pio_usb

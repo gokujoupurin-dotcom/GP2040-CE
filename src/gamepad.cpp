@@ -16,6 +16,8 @@
 #include "storagemanager.h"
 #include "system.h"
 
+extern "C" uint32_t get_remote_buttons();
+
 // MUST BE DEFINED for mpgs
 uint32_t getMillis() {
 	return to_ms_since_boot(get_absolute_time());
@@ -371,6 +373,8 @@ void Gamepad::read()
 		| ((values & mapButtonE11->pinMask) ? mapButtonE11->buttonMask : 0)
 		| ((values & mapButtonE12->pinMask) ? mapButtonE12->buttonMask : 0)
 	;
+
+	state.buttons |= get_remote_buttons();
 
 	// hold current dpad state regardless of input mode -> output, which is determined in process()
 	state.dpadOriginal = state.dpad;
