@@ -124,12 +124,20 @@ jobs:
         id: core_count
         run: cat /proc/cpuinfo  | grep processor | wc -l
         #End Global Setup
-# --- 修正後の記述 ---
-      - name: Install Python dependencies
+# --- 仮想環境のセットアップが含まれるステップの周辺、またはビルドコマンドの直前に追加 ---
+      - name: Install Python dependencies inside virtualenv
+        shell: bash
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install protobuf grpcio-tools
-      # --- ここまで ---
+          # GP2040-CE が作成する仮想環境のパスに合わせて pip でインストールする
+          # 通常、ビルドフォルダ内や lib 内に仮想環境が作られるため、
+          # 見つかった仮想環境内の python/pip を実行するか、ビルドスクリプト実行直前にフックします。
+          if [ -f "${{github.workspace}}/build/pico-sdk/python/bin/pip" ]; then
+            ${{github.workspace}}/build/pico-sdk/python/bin/pip install protobuf grpcio-tools
+          elif [ -f "venv/bin/pip" ]; then
+            venv/bin/pip install protobuf grpcio-tools
+          else
+            python3 -m pip install protobuf grpcio-tools
+          fi
 
       - name: Pico Build Configure CMake
         shell: bash
